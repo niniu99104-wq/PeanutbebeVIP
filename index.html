@@ -2,182 +2,588 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Peanut Bebe 出貨進度</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
+/* ── tokens ── */
 :root {
-  --sage:#7a9e7e; --sage-light:#e8f0e9; --sage-mid:#b5ceb8;
-  --cream:#faf8f4; --warm:#f4f0e8; --text:#2c2a27;
-  --text-mid:#6b6760; --text-light:#a09d98; --border:#e0dbd3; --white:#ffffff;
+  --sage:        #6d9470;
+  --sage-hover:  #5a7d5d;
+  --sage-soft:   #edf3ee;
+  --sage-mid:    #a8c5ab;
+  --cream:       #f8f6f2;
+  --paper:       #ffffff;
+  --warm:        #f3efe8;
+  --ink:         #28261f;
+  --ink-mid:     #625f58;
+  --ink-light:   #a09c94;
+  --line:        #e8e3db;
+
+  --r-card:  14px;
+  --r-pill:  100px;
+  --r-input: 8px;
+
+  --s-wait-bg: #f0ece3; --s-wait-ink: #6e6050;
+  --s-prep-bg: #e6eef9; --s-prep-ink: #2b5496;
+  --s-pack-bg: #fdf0dd; --s-pack-ink: #845500;
+  --s-done-bg: #e5f4e9; --s-done-ink: #1b6130;
 }
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Noto Sans TC',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;}
 
-.header{background:var(--white);border-bottom:1px solid var(--border);padding:1.1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
-.logo{font-family:'Noto Serif TC',serif;font-size:1.05rem;font-weight:500;color:var(--sage);letter-spacing:0.05em;}
-.logo span{font-family:'Noto Sans TC',sans-serif;font-size:0.68rem;color:var(--text-light);display:block;letter-spacing:0.12em;font-weight:300;margin-top:1px;}
-.admin-btn{font-size:0.72rem;color:var(--text-light);cursor:pointer;padding:5px 12px;border:1px solid var(--border);border-radius:20px;background:none;font-family:'Noto Sans TC',sans-serif;transition:all 0.2s;}
-.admin-btn:hover{border-color:var(--sage-mid);color:var(--sage);}
+/* ── reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 300;
+  background: var(--cream);
+  color: var(--ink);
+  min-height: 100vh;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
 
-.main{max-width:640px;margin:0 auto;padding:2rem 1.25rem 5rem;}
+/* ── layout ── */
+.wrap { max-width: 560px; margin: 0 auto; padding: 0 20px; }
 
-.s湊單中{background:#f0ece4;color:#7a6e5f;}
-.s備貨中{background:#e8f0fb;color:#2d5a9e;}
-.s整理中{background:#fef3e2;color:#8a5a00;}
-.s已出貨{background:#e8f5ec;color:#1f6b35;}
+/* ── header ── */
+.site-header {
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; z-index: 50;
+  padding: 0 20px;
+}
+.site-header-inner {
+  max-width: 560px;
+  margin: 0 auto;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.logo-mark {
+  font-family: 'Noto Serif TC', serif;
+  font-weight: 300;
+  font-size: 15px;
+  letter-spacing: .12em;
+  color: var(--sage);
+}
+.logo-sub {
+  font-size: 10px;
+  letter-spacing: .16em;
+  color: var(--ink-light);
+  font-weight: 300;
+  margin-top: 1px;
+}
+.admin-trigger {
+  font-size: 11px;
+  letter-spacing: .06em;
+  color: var(--ink-light);
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 5px 14px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 300;
+  transition: border-color .18s, color .18s;
+}
+.admin-trigger:hover { border-color: var(--sage-mid); color: var(--sage); }
 
-.group-card{background:var(--white);border:1px solid var(--border);border-radius:16px;margin-bottom:0.9rem;overflow:hidden;transition:box-shadow 0.2s;}
-.group-card:hover{box-shadow:0 2px 16px rgba(0,0,0,0.07);}
-.group-head{padding:1rem 1.25rem 0.9rem;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;user-select:none;}
-.group-name{font-size:0.98rem;font-weight:500;color:var(--text);}
-.group-date{font-size:0.75rem;color:var(--text-light);margin-top:2px;}
-.status-pill{font-size:0.72rem;font-weight:500;padding:4px 12px;border-radius:20px;flex-shrink:0;}
-.chevron{font-size:0.7rem;color:var(--text-light);transition:transform 0.2s;flex-shrink:0;}
-.group-card.open .chevron{transform:rotate(180deg);}
-.group-body{display:none;border-top:1px solid var(--border);padding:1rem 1.25rem;}
-.group-card.open .group-body{display:block;}
-.group-note{font-size:0.82rem;color:var(--text-mid);background:var(--warm);border-radius:8px;padding:0.6rem 0.8rem;margin-bottom:0.9rem;line-height:1.7;}
-.group-eta{font-size:0.78rem;color:var(--text-light);margin-bottom:0.75rem;}
+/* ── page sections ── */
+.page-top { padding: 32px 0 24px; }
+.page-title {
+  font-family: 'Noto Serif TC', serif;
+  font-weight: 300;
+  font-size: 22px;
+  letter-spacing: .04em;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.page-desc { font-size: 13px; color: var(--ink-light); letter-spacing: .02em; }
 
-.progress-track{display:flex;margin-bottom:0.5rem;border-radius:8px;overflow:hidden;border:1px solid var(--border);}
-.progress-step{flex:1;text-align:center;padding:7px 4px;font-size:0.68rem;color:var(--text-light);background:var(--cream);border-right:1px solid var(--border);line-height:1.3;}
-.progress-step:last-child{border-right:none;}
-.progress-step.active{background:var(--sage);color:white;font-weight:500;}
-.progress-step.done{background:var(--sage-light);color:var(--sage);}
+/* ── filter chips ── */
+.filter-bar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.chip {
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 300;
+  letter-spacing: .04em;
+  padding: 5px 14px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink-mid);
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.chip:hover { border-color: var(--sage-mid); }
+.chip.on { background: var(--sage); border-color: var(--sage); color: #fff; font-weight: 400; }
 
-.filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.5rem;}
-.chip{padding:5px 13px;border-radius:20px;border:1px solid var(--border);background:var(--white);font-size:0.75rem;cursor:pointer;color:var(--text-mid);transition:all 0.15s;font-family:'Noto Sans TC',sans-serif;}
-.chip.on{background:var(--sage);border-color:var(--sage);color:white;}
+/* ── section label ── */
+.sec-label {
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-light);
+  font-weight: 400;
+  margin-bottom: 12px;
+}
 
-.sec-label{font-size:0.68rem;letter-spacing:0.1em;color:var(--text-light);text-transform:uppercase;margin-bottom:0.75rem;font-weight:500;}
-.empty{text-align:center;padding:3rem 1rem;color:var(--text-light);font-size:0.85rem;line-height:1.9;}
+/* ── group cards ── */
+.group-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: box-shadow .18s;
+}
+.group-card:hover { box-shadow: 0 2px 20px rgba(0,0,0,.06); }
 
-.loading{text-align:center;padding:3rem 1rem;color:var(--text-light);font-size:0.85rem;}
-.loading-dot{display:inline-block;animation:pulse 1.2s ease-in-out infinite;}
-.loading-dot:nth-child(2){animation-delay:0.2s;}
-.loading-dot:nth-child(3){animation-delay:0.4s;}
-@keyframes pulse{0%,80%,100%{opacity:0.3;}40%{opacity:1;}}
+.group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.group-info { flex: 1; min-width: 0; }
+.group-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.group-date {
+  font-size: 11px;
+  color: var(--ink-light);
+  margin-top: 3px;
+  letter-spacing: .02em;
+}
+.group-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.status-pill {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: .04em;
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+}
+.s湊單中 { background: var(--s-wait-bg); color: var(--s-wait-ink); }
+.s備貨中 { background: var(--s-prep-bg); color: var(--s-prep-ink); }
+.s整理中 { background: var(--s-pack-bg); color: var(--s-pack-ink); }
+.s已出貨 { background: var(--s-done-bg); color: var(--s-done-ink); }
 
-/* Admin */
-.admin-panel{display:none;background:var(--white);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:2rem;}
-.admin-panel.open{display:block;}
-.admin-title{font-size:0.82rem;font-weight:500;color:var(--text);margin-bottom:1rem;display:flex;align-items:center;gap:8px;}
-.admin-title::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--sage);display:inline-block;}
-.pass-row{display:flex;gap:8px;margin-bottom:0.75rem;}
-.pass-row input{flex:1;padding:0.6rem 0.8rem;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:'Noto Sans TC',sans-serif;background:var(--cream);outline:none;}
-.pass-row input:focus{border-color:var(--sage-mid);}
-.pass-row button{padding:0.6rem 1rem;background:var(--sage);color:white;border:none;border-radius:8px;font-size:0.82rem;font-family:'Noto Sans TC',sans-serif;cursor:pointer;}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
-.form-grid.wide{grid-template-columns:1fr;}
-.fl label{display:block;font-size:0.7rem;color:var(--text-light);margin-bottom:3px;letter-spacing:0.04em;}
-.fl input,.fl select,.fl textarea{width:100%;padding:0.6rem 0.8rem;border:1px solid var(--border);border-radius:8px;font-size:0.83rem;font-family:'Noto Sans TC',sans-serif;color:var(--text);background:var(--cream);outline:none;transition:border-color 0.2s;}
-.fl input:focus,.fl select:focus,.fl textarea:focus{border-color:var(--sage-mid);background:var(--white);}
-.fl textarea{resize:vertical;min-height:56px;}
-.add-btn{width:100%;padding:0.7rem;background:var(--sage);color:white;border:none;border-radius:10px;font-size:0.85rem;font-family:'Noto Sans TC',sans-serif;cursor:pointer;margin-top:6px;transition:background 0.2s;}
-.add-btn:hover{background:#6a8e6e;}
-.add-btn:disabled{opacity:0.6;cursor:not-allowed;}
-.alist{margin-top:1.25rem;border-top:1px solid var(--border);padding-top:1.1rem;}
-.aitem{display:flex;align-items:center;gap:8px;padding:0.55rem 0;border-bottom:1px solid var(--border);font-size:0.8rem;}
-.aitem-name{flex:1;}
-.aitem-name b{font-weight:500;display:block;}
-.aitem-name span{color:var(--text-light);font-size:0.73rem;}
-.sselect{padding:3px 8px;border:1px solid var(--border);border-radius:8px;font-size:0.73rem;font-family:'Noto Sans TC',sans-serif;background:var(--cream);color:var(--text);cursor:pointer;}
-.del{background:none;border:none;color:var(--text-light);cursor:pointer;font-size:1rem;padding:2px 5px;border-radius:4px;}
-.del:hover{color:#c0392b;}
+.chevron {
+  width: 18px; height: 18px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink-light);
+  transition: transform .2s;
+  flex-shrink: 0;
+}
+.chevron svg { display: block; }
+.group-card.open .chevron { transform: rotate(180deg); }
 
-.gas-warning{background:#fff8e6;border:1px solid #f0d080;border-radius:10px;padding:0.85rem 1rem;font-size:0.78rem;color:#7a5a00;line-height:1.7;margin-bottom:1.5rem;}
-.gas-warning code{background:#f0d080;padding:1px 5px;border-radius:4px;font-size:0.75rem;}
+.group-body {
+  display: none;
+  border-top: 1px solid var(--line);
+  padding: 16px 18px 18px;
+}
+.group-card.open .group-body { display: block; }
 
-.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:white;padding:0.55rem 1.2rem;border-radius:20px;font-size:0.78rem;opacity:0;transition:all 0.22s;pointer-events:none;z-index:999;font-family:'Noto Sans TC',sans-serif;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+/* progress bar */
+.progress-track {
+  display: flex;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  margin-bottom: 14px;
+}
+.progress-step {
+  flex: 1;
+  text-align: center;
+  padding: 8px 4px;
+  font-size: 11px;
+  color: var(--ink-light);
+  background: var(--cream);
+  border-right: 1px solid var(--line);
+  line-height: 1.3;
+  letter-spacing: .02em;
+}
+.progress-step:last-child { border-right: none; }
+.progress-step.done { background: var(--sage-soft); color: var(--sage); }
+.progress-step.active { background: var(--sage); color: #fff; font-weight: 500; }
 
-@media(max-width:480px){.form-grid{grid-template-columns:1fr;}.main{padding:1.5rem 1rem 4rem;}}
+.group-eta {
+  font-size: 12px;
+  color: var(--ink-light);
+  margin-bottom: 10px;
+  letter-spacing: .02em;
+}
+.group-note {
+  font-size: 13px;
+  color: var(--ink-mid);
+  background: var(--warm);
+  border-radius: 8px;
+  padding: 10px 13px;
+  line-height: 1.75;
+}
+
+/* ── states ── */
+.list-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--ink-light);
+  font-size: 13px;
+  line-height: 2;
+}
+.loading-dots {
+  display: inline-flex;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+.loading-dots span {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--sage-mid);
+  animation: blink 1.2s ease-in-out infinite;
+}
+.loading-dots span:nth-child(2) { animation-delay: .2s; }
+.loading-dots span:nth-child(3) { animation-delay: .4s; }
+@keyframes blink { 0%,80%,100%{opacity:.25} 40%{opacity:1} }
+
+/* ── admin panel ── */
+.admin-panel {
+  display: none;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+.admin-panel.open { display: block; }
+
+.admin-section {
+  padding: 20px 20px 4px;
+}
+.admin-section + .admin-section {
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+}
+
+.admin-heading {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-light);
+  margin-bottom: 16px;
+}
+
+/* login */
+.login-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.login-row input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-input);
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 300;
+  color: var(--ink);
+  background: var(--cream);
+  outline: none;
+  transition: border-color .18s;
+}
+.login-row input:focus { border-color: var(--sage-mid); background: var(--paper); }
+.btn-sage {
+  padding: 10px 18px;
+  background: var(--sage);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-input);
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 400;
+  cursor: pointer;
+  letter-spacing: .04em;
+  transition: background .18s;
+  white-space: nowrap;
+}
+.btn-sage:hover { background: var(--sage-hover); }
+.btn-sage:disabled { opacity: .5; cursor: not-allowed; }
+
+/* form grid */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.form-grid.solo { grid-template-columns: 1fr; }
+.fl { display: flex; flex-direction: column; gap: 4px; }
+.fl label { font-size: 11px; color: var(--ink-light); letter-spacing: .06em; font-weight: 400; }
+.fl input, .fl select, .fl textarea {
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-input);
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 300;
+  color: var(--ink);
+  background: var(--cream);
+  outline: none;
+  transition: border-color .18s;
+}
+.fl input:focus, .fl select:focus, .fl textarea:focus {
+  border-color: var(--sage-mid);
+  background: var(--paper);
+}
+.fl textarea { resize: vertical; min-height: 64px; line-height: 1.6; }
+.btn-add {
+  width: 100%;
+  padding: 11px;
+  background: var(--sage);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-input);
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 400;
+  letter-spacing: .06em;
+  cursor: pointer;
+  margin: 4px 0 20px;
+  transition: background .18s;
+}
+.btn-add:hover { background: var(--sage-hover); }
+.btn-add:disabled { opacity: .5; cursor: not-allowed; }
+
+/* admin list */
+.admin-list { }
+.a-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+}
+.a-item:last-child { border-bottom: none; }
+.a-item-info { flex: 1; min-width: 0; }
+.a-item-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.a-item-date { font-size: 11px; color: var(--ink-light); margin-top: 1px; }
+.a-status-select {
+  font-size: 12px;
+  font-family: inherit;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--cream);
+  color: var(--ink);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.a-del {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  background: none;
+  border: none;
+  color: var(--ink-light);
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 16px;
+  flex-shrink: 0;
+  transition: color .15s, background .15s;
+}
+.a-del:hover { color: #c0392b; background: #fef0ef; }
+
+/* ── warning ── */
+.gas-warning {
+  background: #fffaeb;
+  border: 1px solid #f0d58a;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 12px;
+  color: #7a5f00;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+.gas-warning code { background: #f5e199; padding: 1px 5px; border-radius: 4px; font-size: 11px; }
+
+/* ── toast ── */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: var(--ink);
+  color: #fff;
+  padding: 9px 20px;
+  border-radius: var(--r-pill);
+  font-size: 12px;
+  letter-spacing: .04em;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 999;
+  transition: opacity .2s, transform .2s;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── responsive ── */
+@media (max-width: 480px) {
+  .wrap { padding: 0 16px; }
+  .site-header { padding: 0 16px; }
+  .page-top { padding: 24px 0 20px; }
+  .page-title { font-size: 19px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .group-head { padding: 14px 15px; }
+  .group-body { padding: 14px 15px 16px; }
+  .admin-section { padding: 16px 15px 4px; }
+  .progress-step { font-size: 10px; padding: 7px 2px; }
+}
+@media (min-width: 560px) {
+  .site-header-inner, .wrap { max-width: 560px; }
+}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="logo">Peanut Bebe <span>出貨進度查詢</span></div>
-  <button class="admin-btn" onclick="toggleAdmin()">管理員</button>
-</div>
+<header class="site-header">
+  <div class="site-header-inner">
+    <div>
+      <div class="logo-mark">Peanut Bebe</div>
+      <div class="logo-sub">出貨進度查詢</div>
+    </div>
+    <button class="admin-trigger" onclick="toggleAdmin()">管理員</button>
+  </div>
+</header>
 
-<div class="main">
+<div class="wrap">
 
-  <!-- ① GAS 尚未設定時的提示 -->
+  <div class="page-top">
+    <h1 class="page-title">出貨進度</h1>
+    <p class="page-desc">選擇狀態篩選，或點開團名查看詳細進度</p>
+  </div>
+
   <div class="gas-warning" id="gasWarning" style="display:none">
-    ⚠️ 尚未連接資料來源。請在 HTML 檔案第一行把 <code>GAS_URL</code> 換成你的 GAS 網址，儲存後重新開啟即可。
+    ⚠️ 尚未連接資料來源。請在檔案中把 <code>GAS_URL</code> 換成你的 GAS 網址。
   </div>
 
+  <!-- Admin -->
   <div class="admin-panel" id="ap">
-    <div id="authForm">
-      <div class="admin-title">管理員登入</div>
-      <div class="pass-row">
+    <!-- Login -->
+    <div class="admin-section" id="authForm">
+      <div class="admin-heading">管理員登入</div>
+      <div class="login-row">
         <input type="password" id="pw" placeholder="輸入密碼" onkeydown="if(event.key==='Enter')auth()">
-        <button onclick="auth()">進入</button>
+        <button class="btn-sage" onclick="auth()">進入</button>
       </div>
     </div>
+    <!-- Content -->
     <div id="adminContent" style="display:none">
-      <div class="admin-title">新增團單</div>
-      <div class="form-grid">
-        <div class="fl"><label>團名稱</label><input id="fg" placeholder="例：夏季韓裝團"></div>
-        <div class="fl"><label>結單日期</label><input type="date" id="fd"></div>
-      </div>
-      <div class="form-grid">
-        <div class="fl"><label>目前狀態</label>
-          <select id="fs"><option>湊單中</option><option>備貨中</option><option>整理中</option><option>已出貨</option></select>
+      <div class="admin-section">
+        <div class="admin-heading">新增團單</div>
+        <div class="form-grid">
+          <div class="fl"><label>團名稱</label><input id="fg" placeholder="例：夏季韓裝團"></div>
+          <div class="fl"><label>結單日期</label><input type="date" id="fd"></div>
         </div>
-        <div class="fl"><label>預計時間（選填）</label><input id="fe" placeholder="例：預計 7/15 出貨"></div>
+        <div class="form-grid">
+          <div class="fl"><label>目前狀態</label>
+            <select id="fs">
+              <option>湊單中</option><option>備貨中</option><option>整理中</option><option>已出貨</option>
+            </select>
+          </div>
+          <div class="fl"><label>預計時間（選填）</label><input id="fe" placeholder="例：預計 7/15 出貨"></div>
+        </div>
+        <div class="form-grid">
+          <div class="fl"><label>出貨日期（已出貨時填）</label><input type="date" id="fship"></div>
+          <div class="fl"><label>　</label></div>
+        </div>
+        <div class="form-grid solo">
+          <div class="fl"><label>備註（選填）</label><textarea id="fn" placeholder="例：韓國補貨中，感謝等待 🙏"></textarea></div>
+        </div>
+        <button class="btn-add" id="addBtn" onclick="addGroup()">新增團單</button>
       </div>
-      <div class="form-grid wide">
-        <div class="fl"><label>備註（選填）</label><textarea id="fn" placeholder="例：韓國補貨中，感謝等待 🙏"></textarea></div>
-      </div>
-      <button class="add-btn" id="addBtn" onclick="addGroup()">新增</button>
-      <div class="alist">
-        <div class="admin-title">管理現有團單</div>
-        <div id="alist"></div>
+      <div class="admin-section" style="padding-bottom:20px">
+        <div class="admin-heading">管理現有團單</div>
+        <div class="admin-list" id="alist"></div>
       </div>
     </div>
   </div>
 
-  <div class="filter-row">
-    <div class="chip on" data-f="all" onclick="setFilter('all',this)">全部</div>
-    <div class="chip" data-f="湊單中" onclick="setFilter('湊單中',this)">湊單中</div>
-    <div class="chip" data-f="備貨中" onclick="setFilter('備貨中',this)">備貨中</div>
-    <div class="chip" data-f="整理中" onclick="setFilter('整理中',this)">整理中</div>
-    <div class="chip" data-f="已出貨" onclick="setFilter('已出貨',this)">已出貨</div>
+  <!-- Filter -->
+  <div class="filter-bar">
+    <button class="chip on" onclick="setFilter('all',this)">全部</button>
+    <button class="chip" onclick="setFilter('湊單中',this)">湊單中</button>
+    <button class="chip" onclick="setFilter('備貨中',this)">備貨中</button>
+    <button class="chip" onclick="setFilter('整理中',this)">整理中</button>
+    <button class="chip" onclick="setFilter('已出貨',this)">已出貨</button>
   </div>
 
-  <div class="sec-label">點團名查看詳細進度</div>
+  <div class="sec-label">所有團單</div>
   <div id="list"></div>
-</div>
+
+</div><!-- /wrap -->
 
 <div class="toast" id="toast"></div>
 
 <script>
 // ═══════════════════════════════════════════════
-//  ★ 唯一需要填的地方：把 GAS 網址貼在這裡
+//  ★ GAS 網址
 // ═══════════════════════════════════════════════
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbxZMLborD8PxPB53s2eOUHkrsFzewfhwceWkxal_0EhqfieB1_3-PhxjTkf1pGnLMTSpg/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzCrtvdn4LNvRL5Y_FdfN6C6HVQXV5SeLcvpV5LA7hieTeGNf9UOo-nUW3ZLbfxaCbl4w/exec';
 // ═══════════════════════════════════════════════
 
 const STEPS = ['湊單中','備貨中','整理中','已出貨'];
-const ORDER = {'湊單中':0,'備貨中':1,'整理中':2,'已出貨':3};
-let curFilter = 'all';
-let authed = false;
-let cachedGroups = [];
+const SORDER = {'湊單中':0,'備貨中':1,'整理中':2,'已出貨':3};
+let curFilter = 'all', authed = false, cachedGroups = [];
 
-// ── 初始化 ──────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
-  if (!GAS_URL) {
-    document.getElementById('gasWarning').style.display = 'block';
-    showDemo();
-    return;
-  }
+  if (!GAS_URL) { document.getElementById('gasWarning').style.display='block'; showDemo(); return; }
   loadGroups();
 });
 
-// ── Demo 模式（GAS 尚未設定時顯示範例資料）──────
+/* ── JSONP helpers ── */
+function gasGet(action) {
+  return new Promise((res, rej) => {
+    const cb = '_cb' + Date.now();
+    const s = document.createElement('script');
+    s.src = `${GAS_URL}?action=${action}&callback=${cb}`;
+    window[cb] = d => { delete window[cb]; s.remove(); res(d); };
+    s.onerror = () => { delete window[cb]; s.remove(); rej(); };
+    document.body.appendChild(s);
+  });
+}
+function gasPost(p) {
+  return new Promise((res, rej) => {
+    const cb = '_cb' + Date.now();
+    const s = document.createElement('script');
+    s.src = GAS_URL + '?' + Object.entries({...p, callback:cb}).map(([k,v])=>k+'='+encodeURIComponent(v)).join('&');
+    window[cb] = d => { delete window[cb]; s.remove(); res(d); };
+    s.onerror = () => { delete window[cb]; s.remove(); rej(); };
+    document.body.appendChild(s);
+  });
+}
+
+/* ── data ── */
 function showDemo() {
   cachedGroups = [
     {id:'1',group:'夏季韓裝團',date:'2025-06-01',status:'整理中',eta:'預計本週出貨',note:'到貨了！正在裝袋中 🌿'},
@@ -188,122 +594,85 @@ function showDemo() {
   render();
 }
 
-// ── 讀取資料 ────────────────────────────────────
-function gasGet(action) {
-  return new Promise((resolve, reject) => {
-    const cb = 'cb_' + Date.now();
-    const script = document.createElement('script');
-    script.src = `${GAS_URL}?action=${action}&callback=${cb}`;
-    window[cb] = (data) => { delete window[cb]; script.remove(); resolve(data); };
-    script.onerror = () => { delete window[cb]; script.remove(); reject(new Error('JSONP failed')); };
-    document.body.appendChild(script);
-  });
-}
-
-function gasPost(payload) {
-  return new Promise((resolve, reject) => {
-    const cb = 'cb_' + Date.now();
-    const p = { ...payload, callback: cb };
-    const script = document.createElement('script');
-    script.src = GAS_URL + '?' + Object.entries(p).map(([k,v]) => k+'='+encodeURIComponent(v)).join('&');
-    window[cb] = (data) => { delete window[cb]; script.remove(); resolve(data); };
-    script.onerror = () => { delete window[cb]; script.remove(); reject(new Error('JSONP failed')); };
-    document.body.appendChild(script);
-  });
-}
-
-async function loadGroups(silent = false) {
+async function loadGroups(silent=false) {
   if (!silent) showLoading();
   try {
-    const data = await gasGet('getGroups');
-    cachedGroups = Array.isArray(data) ? data : [];
+    const d = await gasGet('getGroups');
+    cachedGroups = Array.isArray(d) ? d : [];
     render();
-  } catch(e) {
-    document.getElementById('list').innerHTML = '<div class="empty">無法載入資料，請稍後再試</div>';
-  }
+  } catch { document.getElementById('list').innerHTML = '<div class="list-state">無法載入資料，請稍後再試</div>'; }
 }
 
-// ── 顯示 loading ────────────────────────────────
+/* ── render ── */
 function showLoading() {
   document.getElementById('list').innerHTML = `
-    <div class="loading">
-      <span class="loading-dot">●</span>
-      <span class="loading-dot">●</span>
-      <span class="loading-dot">●</span>
+    <div class="list-state">
+      <div class="loading-dots"><span></span><span></span><span></span></div><br>載入中
     </div>`;
 }
 
-// ── 篩選 ────────────────────────────────────────
-function setFilter(f, el) {
-  curFilter = f;
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
-  el.classList.add('on');
-  render();
-}
-
-// ── 渲染團單列表 ────────────────────────────────
-function stepClass(itemStatus, step) {
-  const iIdx = STEPS.indexOf(itemStatus);
-  const sIdx = STEPS.indexOf(step);
-  if (sIdx < iIdx) return 'done';
-  if (sIdx === iIdx) return 'active';
-  return '';
+function stepCls(status, step) {
+  const si = STEPS.indexOf(status), pi = STEPS.indexOf(step);
+  return pi < si ? 'done' : pi === si ? 'active' : '';
 }
 
 function render() {
-  const filtered = curFilter === 'all'
-    ? cachedGroups
-    : cachedGroups.filter(g => g.status === curFilter);
+  const f = curFilter === 'all' ? cachedGroups : cachedGroups.filter(g => g.status === curFilter);
   const list = document.getElementById('list');
-  if (!filtered.length) {
-    list.innerHTML = '<div class="empty">目前沒有這個狀態的團單<br>有任何問題歡迎看群公告 🌿</div>';
-    return;
+  if (!f.length) {
+    list.innerHTML = '<div class="list-state">目前沒有這個狀態的團單 🌿</div>'; return;
   }
-  const sorted = [...filtered].sort((a,b) => ORDER[a.status] - ORDER[b.status]);
+  const sorted = [...f].sort((a,b) => SORDER[a.status] - SORDER[b.status]);
   list.innerHTML = sorted.map(g => `
     <div class="group-card" id="card-${g.id}">
       <div class="group-head" onclick="toggle('${g.id}')">
-        <div>
+        <div class="group-info">
           <div class="group-name">${esc(g.group)}</div>
-          <div class="group-date">結單：${g.date}</div>
+          <div class="group-date">結單 ${fmtDate(g.date)}</div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div class="status-pill s${g.status}">${g.status}</div>
-          <div class="chevron">▼</div>
+        <div class="group-right">
+          <span class="status-pill s${g.status}">${g.status}</span>
+          <span class="chevron">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
         </div>
       </div>
       <div class="group-body">
         <div class="progress-track">
-          ${STEPS.map(s=>`<div class="progress-step ${stepClass(g.status,s)}">${s}</div>`).join('')}
+          ${STEPS.map(s=>`<div class="progress-step ${stepCls(g.status,s)}">${s}</div>`).join('')}
         </div>
-        ${g.eta ? `<div class="group-eta" style="margin-top:0.7rem">${esc(g.eta)}</div>` : ''}
+        ${g.eta ? `<div class="group-eta">${esc(g.eta)}</div>` : ''}
+        ${g.shipped_at ? `<div class="group-eta" style="color:var(--s-done-ink);font-weight:500">📦 出貨日期：${fmtDate(g.shipped_at)}</div>` : ''}
         ${g.note ? `<div class="group-note">${esc(g.note)}</div>` : ''}
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
-function toggle(id) {
-  document.getElementById('card-'+id)?.classList.toggle('open');
+function toggle(id) { document.getElementById('card-'+id)?.classList.toggle('open'); }
+
+function setFilter(f, el) {
+  curFilter = f;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  render();
 }
 
-// ── 管理員登入 ──────────────────────────────────
+/* ── admin ── */
+function toggleAdmin() {
+  const p = document.getElementById('ap');
+  p.classList.toggle('open');
+  if (p.classList.contains('open') && authed) renderAdminList();
+}
+
 async function auth() {
   const input = document.getElementById('pw').value;
-  if (!GAS_URL) {
-    // demo mode: any password works
-    if (input) openAdmin();
-    else showToast('請輸入密碼');
-    return;
-  }
+  if (!GAS_URL) { if (input) openAdmin(); else toast('請輸入密碼'); return; }
   try {
-    const data = await gasGet('getPassword');
-    if (input === String(data.password)) {
-      openAdmin();
-    } else {
-      showToast('密碼不對，請再試');
-    }
-  } catch(e) { showToast('連線失敗，請稍後再試'); }
+    const d = await gasGet('getPassword');
+    input === String(d.password) ? openAdmin() : toast('密碼不對，請再試');
+  } catch { toast('連線失敗，請稍後再試'); }
 }
 
 function openAdmin() {
@@ -313,100 +682,75 @@ function openAdmin() {
   renderAdminList();
 }
 
-function toggleAdmin() {
-  const p = document.getElementById('ap');
-  p.classList.toggle('open');
-  if (p.classList.contains('open') && authed) renderAdminList();
-}
-
-// ── 管理員列表 ──────────────────────────────────
 function renderAdminList() {
-  const list = document.getElementById('alist');
-  if (!cachedGroups.length) {
-    list.innerHTML = '<div style="font-size:0.78rem;color:var(--text-light);padding:0.75rem 0">尚無團單</div>';
-    return;
-  }
-  list.innerHTML = cachedGroups.map(g => `
-    <div class="aitem">
-      <div class="aitem-name">
-        <b>${esc(g.group)}</b>
-        <span>結單 ${g.date}</span>
+  const el = document.getElementById('alist');
+  if (!cachedGroups.length) { el.innerHTML = '<div style="font-size:12px;color:var(--ink-light);padding:8px 0">尚無團單</div>'; return; }
+  el.innerHTML = cachedGroups.map(g => `
+    <div class="a-item">
+      <div class="a-item-info">
+        <div class="a-item-name">${esc(g.group)}</div>
+        <div class="a-item-date">結單 ${fmtDate(g.date)}</div>
       </div>
-      <select class="sselect" onchange="updateStatus('${g.id}',this.value)">
+      <select class="a-status-select" onchange="updateStatus('${g.id}',this.value)">
         ${STEPS.map(s=>`<option${s===g.status?' selected':''}>${s}</option>`).join('')}
       </select>
-      <button class="del" onclick="del('${g.id}')">×</button>
-    </div>
-  `).join('');
+      <button class="a-del" onclick="del('${g.id}')" title="刪除">×</button>
+    </div>`).join('');
 }
 
-// ── 新增團單 ────────────────────────────────────
 async function addGroup() {
   const group = document.getElementById('fg').value.trim();
-  const date = document.getElementById('fd').value;
-  const status = document.getElementById('fs').value;
-  const eta = document.getElementById('fe').value.trim();
-  const note = document.getElementById('fn').value.trim();
-  if (!group) { showToast('請填寫團名稱'); return; }
-
+  const date  = document.getElementById('fd').value;
+  const status= document.getElementById('fs').value;
+  const eta   = document.getElementById('fe').value.trim();
+  const note  = document.getElementById('fn').value.trim();
+  if (!group) { toast('請填寫團名稱'); return; }
   const btn = document.getElementById('addBtn');
-  btn.disabled = true; btn.textContent = '新增中...';
-
-  const payload = { action:'addGroup', group, date: date || today(), status, eta, note };
-
-  if (!GAS_URL) {
-    // demo
-    cachedGroups.unshift({id:Date.now()+'',group,date:date||today(),status,eta,note});
-    afterAdd(btn, group);
-    return;
+  btn.disabled = true; btn.textContent = '新增中…';
+  const shipped_at = document.getElementById('fship').value;
+  const payload = {action:'addGroup', group, date: date||today(), status, eta, note, shipped_at};
+  if (!GAS_URL) { cachedGroups.unshift({id:Date.now()+'',group,date:date||today(),status,eta,note,shipped_at}); done(); return; }
+  try { await gasPost(payload); await loadGroups(true); done(); }
+  catch { toast('新增失敗，請稍後再試'); btn.disabled=false; btn.textContent='新增團單'; }
+  function done() {
+    ['fg','fd','fe','fn','fship'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('fs').value='湊單中';
+    btn.disabled=false; btn.textContent='新增團單';
+    renderAdminList(); toast('已新增「'+group+'」');
   }
-  try {
-    await gasPost(payload);
-    await loadGroups(true);
-    afterAdd(btn, group);
-  } catch(e) { showToast('新增失敗，請稍後再試'); btn.disabled=false; btn.textContent='新增'; }
 }
 
-function afterAdd(btn, group) {
-  ['fg','fd','fe','fn'].forEach(id => document.getElementById(id).value='');
-  document.getElementById('fs').value='湊單中';
-  btn.disabled=false; btn.textContent='新增';
-  renderAdminList();
-  showToast('已新增「'+group+'」');
-}
-
-// ── 更新狀態 ────────────────────────────────────
 async function updateStatus(id, status) {
-  const g = cachedGroups.find(x => String(x.id)===String(id));
+  const g = cachedGroups.find(x=>String(x.id)===String(id));
   if (g) g.status = status;
   render();
-  if (!GAS_URL) { showToast('狀態已更新（demo）'); return; }
-  try {
-    await gasPost({action:'updateStatus',id,status});
-    showToast('狀態已更新');
-  } catch(e) { showToast('更新失敗，請重試'); }
+  if (!GAS_URL) { toast('狀態已更新'); return; }
+  try { await gasPost({action:'updateStatus',id,status}); toast('狀態已更新'); }
+  catch { toast('更新失敗，請重試'); }
 }
 
-// ── 刪除 ────────────────────────────────────────
 async function del(id) {
   if (!confirm('確定刪除這個團單？')) return;
-  cachedGroups = cachedGroups.filter(x => String(x.id)!==String(id));
+  cachedGroups = cachedGroups.filter(x=>String(x.id)!==String(id));
   render(); renderAdminList();
-  if (!GAS_URL) { showToast('已刪除（demo）'); return; }
-  try {
-    await gasPost({action:'deleteGroup',id});
-    showToast('已刪除');
-  } catch(e) { showToast('刪除失敗，請重試'); }
+  if (!GAS_URL) { toast('已刪除'); return; }
+  try { await gasPost({action:'deleteGroup',id}); toast('已刪除'); }
+  catch { toast('刪除失敗，請重試'); }
 }
 
-// ── 工具 ────────────────────────────────────────
+/* ── utils ── */
 function today() { return new Date().toISOString().slice(0,10); }
+function fmtDate(s) {
+  if (!s) return '';
+  const d = new Date(s);
+  if (isNaN(d)) return s;
+  return d.getFullYear() + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + String(d.getDate()).padStart(2,'0');
+}
 function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function showToast(msg) {
+function toast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2200);
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
 }
 </script>
 </body>
